@@ -1,36 +1,109 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Clankers Books
 
-## Getting Started
+Una plataforma moderna de recomendaciones de libros donde los usuarios pueden descubrir, comentar y dejar reseñas de sus lecturas favoritas.
 
-First, run the development server:
+## Stack Tecnológico
+
+- **Framework**: [Next.js](https://nextjs.org) - React framework con SSR y optimizaciones
+- **Lenguaje**: TypeScript - Para mayor seguridad de tipos
+- **Styling**: CSS - Estilos optimizados
+- **Autenticación**: Sistema de login/signup integrado
+- **Base de datos**: Configurada en `lib/auth.ts`
+
+## Características
+
+- Exploración de libros recomendados
+- Sistema de calificación con estrellas
+- Reseñas detalladas de usuarios
+- Perfil de usuario personalizado
+- Autenticación segura
+- Búsqueda de libros
+- Interfaz responsive
+
+## Instalación
+
+### Requisitos previos
+- Node.js 16+ instalado
+- npm, yarn, pnpm o bun
+
+### Pasos de instalación
+
+1. Clona el repositorio:
+```bash
+git clone <repository-url>
+cd clankers-books
+```
+
+2. Instala las dependencias:
+```bash
+npm install
+# o
+yarn install
+# o
+pnpm install
+# o
+bun install
+```
+
+## Ejecución
+
+Inicia el servidor de desarrollo:
 
 ```bash
 npm run dev
-# or
+# o
 yarn dev
-# or
+# o
 pnpm dev
-# or
+# o
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abre [http://localhost:3000](http://localhost:3000) en tu navegador para ver la aplicación.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Estructura del Proyecto
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+app/
+  ├── components/        # Componentes reutilizables
+  ├── book/             # Detalles de libros individuales
+  ├── discover/         # Página de descubrimiento
+  ├── login/            # Página de inicio de sesión
+  ├── signup/           # Página de registro
+  ├── profile/          # Perfil de usuario
+  ├── data/             # Datos de libros
+  └── globals.css       # Estilos globales
+lib/
+  └── auth.ts           # Lógica de autenticación
+```
 
-## Learn More
+## Componentes Principales
 
-To learn more about Next.js, take a look at the following resources:
+- **BookCard** - Tarjeta para mostrar información del libro
+- **ReviewCard** - Muestra reseñas de usuarios
+- **ReviewModal** - Modal para crear/editar reseñas
+- **StarRating** - Sistema de calificación con estrellas
+- **SearchBar** - Búsqueda de libros
+- **Header** - Encabezado de navegación
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Edición
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Puedes comenzar a editar la aplicación modificando `app/page.tsx`. La página se actualiza automáticamente mientras editas.
 
-## Deploy on Vercel
+## Aprende más
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Para aprender más sobre Next.js:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [Documentación de Next.js](https://nextjs.org/docs) - Características y API
+- [Tutorial Next.js](https://nextjs.org/learn) - Tutorial interactivo
+- [Repositorio GitHub de Next.js](https://github.com/vercel/next.js)
+
+## Despliegue
+
+La forma más fácil de desplegar esta aplicación es usando [Vercel Platform](https://vercel.com/new?utm_medium=default-template&utm_source=create-next-app&utm_campaign=create-next-app-readme).
+
+Consulta la [documentación de despliegue de Next.js](https://nextjs.org/docs/app/building-your-application/deploying) para más detalles.
+
+## Licencia
+
+Este proyecto está bajo licencia MIT.
