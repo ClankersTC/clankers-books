@@ -6,12 +6,17 @@ import Link from "next/link";
 import Image from "next/image";
 import { setAuthCookie } from "../../lib/auth";
 
+const API_URL = process.env.NEXT_PUBLIC_API_ROUTE_CLANKERS_AUTH
+
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    router.refresh();
+
     e.preventDefault();
     setError("");
 
@@ -19,23 +24,38 @@ export default function LoginPage() {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
-    // Basic validation
+    // Validación básica
     if (!email || !password) {
       setError("Please fill in all fields");
+      setLoading(false);
       return;
     }
 
-    // In a real app, this would validate against a backend
-    // For demo purposes, accept any email/password
-    setAuthCookie({
-      email,
-      name: email.split("@")[0],
-      memberSince: new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" }),
-    });
+    try {
+      const res = await fetch(`${API_URL}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-    // Redirect to discover or the original destination
-    const redirect = searchParams.get("redirect") || "/discover";
-    router.push(redirect);
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.detail || "Invalid email or password");
+      }
+
+      
+      setAuthCookie(data.idToken, data.userData);
+
+      
+      router.push("/discover");
+
+    } catch (err: any) {
+      console.error("Login error:", err);
+      setError(err.message || "Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -99,9 +119,10 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            className="w-full py-3 rounded-lg bg-[#D6A55F] text-[#FCFBF9] font-medium hover:bg-[#B8B1A6] transition-colors"
+            disabled={loading}
+            className="w-full py-3 rounded-lg bg-[#D6A55F] text-[#FCFBF9] font-medium hover:bg-[#B8B1A6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Log In
+            {loading ? "Logging in..." : "Log In"}
           </button>
         </form>
 

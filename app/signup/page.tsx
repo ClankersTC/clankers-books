@@ -6,11 +6,16 @@ import Link from "next/link";
 import Image from "next/image";
 import { setAuthCookie } from "../../lib/auth";
 
+const API_URL = process.env.NEXT_PUBLIC_API_ROUTE_CLANKERS_AUTH;
+
 export default function SignupPage() {
   const router = useRouter();
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    router.refresh();
+
     e.preventDefault();
     setError("");
 
@@ -37,15 +42,48 @@ export default function SignupPage() {
       return;
     }
 
-    // In a real app, this would create an account on the backend
-    // For demo purposes, set auth cookie and redirect
-    setAuthCookie({
-      email,
-      name: fullName,
-      memberSince: new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" }),
-    });
+    try {
+      const registerRes = await fetch(`${API_URL}/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: fullName, 
+          email: email,
+          password: password,
+        }),
+      });
 
-    router.push("/discover");
+      const registerData = await registerRes.json();
+
+      if (!registerRes.ok) {
+        throw new Error(registerData.detail || "Error creating account");
+      }
+
+      const loginRes = await fetch(`${API_URL}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: email,
+          password: password,
+        }),
+      });
+
+      const loginData = await loginRes.json();
+
+      if (!loginRes.ok) {
+        throw new Error("Account created, but auto-login failed. Please log in manually.");
+      }
+
+      setAuthCookie(loginData.idToken, loginData.userData);
+
+      router.push("/discover");
+
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -150,9 +188,10 @@ export default function SignupPage() {
 
           <button
             type="submit"
-            className="w-full py-3 rounded-lg bg-[#D6A55F] text-[#FCFBF9] font-medium hover:bg-[#B8B1A6] transition-colors"
+            disabled={loading}
+            className="w-full py-3 rounded-lg bg-[#D6A55F] text-[#FCFBF9] font-medium hover:bg-[#B8B1A6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Create Account
+            {loading ? "Creating Account..." : "Create Account"}
           </button>
         </form>
 

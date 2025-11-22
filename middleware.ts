@@ -24,7 +24,7 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
   // Check if user is authenticated (simple cookie check)
-  const isAuthenticated = request.cookies.has("clankers-auth");
+  const isAuthenticated = request.cookies.has("clankers_token");
   
   // Check if the current path is a protected route
   const isProtectedRoute = protectedRoutes.some((route) =>
