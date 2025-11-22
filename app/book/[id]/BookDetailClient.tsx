@@ -7,13 +7,35 @@ import { Book } from "../../data/books";
 import StarRating from "../../components/StarRating";
 import ReviewCard from "../../components/ReviewCard";
 import ReviewModal from "../../components/ReviewModal";
+import { useBook } from "@/hooks/useBook";
 
 interface BookDetailClientProps {
-  book: Book;
+  bookId: string; 
 }
 
-export default function BookDetailClient({ book }: BookDetailClientProps) {
+export default function BookDetailClient({ bookId }: BookDetailClientProps) {
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const { data: book, isLoading, isError, error } = useBook(bookId);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#F8F4EE] flex items-center justify-center">
+        <p className="text-[#2B2B2B] font-mono text-lg animate-pulse">Loading book details...</p>
+      </div>
+    );
+  }
+  if (isError || !book) {
+    return (
+      <div className="min-h-screen bg-[#F8F4EE] flex flex-col items-center justify-center gap-4">
+        <p className="text-red-600 font-mono text-lg">
+          {error instanceof Error ? error.message : "Error loading book"}
+        </p>
+        <Link href="/discover" className="text-[#D6A55F] underline hover:text-[#B8B1A6]">
+          Back to Discover
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -86,6 +108,7 @@ export default function BookDetailClient({ book }: BookDetailClientProps) {
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 192px, 224px"
+                  priority
                 />
               </div>
             </div>
@@ -101,7 +124,7 @@ export default function BookDetailClient({ book }: BookDetailClientProps) {
               <div className="flex items-center gap-3">
                 <StarRating rating={book.rating} size="lg" />
                 <span className="text-[#2B2B2B] font-bold">{book.rating}</span>
-                <span className="text-[#6F6F6F]">({book.reviewCount.toLocaleString()} reviews)</span>
+                <span className="text-[#6F6F6F]">({book.reviewCount?.toLocaleString() || 0} reviews)</span>
               </div>
 
               {/* Action Buttons */}
