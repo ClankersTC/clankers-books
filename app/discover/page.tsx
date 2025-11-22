@@ -1,13 +1,36 @@
+"use client"
 import Header from "../components/Header";
 import SearchBar from "../components/SearchBar";
 import BookCard from "../components/BookCard";
-import { books } from "../data/books";
+import { useBooks } from "@/hooks/useBooks";
+import Link from "next/link";
 
 export default function DiscoverPage() {
   // Recommended books data
+  const { data: books, isLoading, isError } = useBooks();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#F8F4EE] flex items-center justify-center">
+        <p className="text-[#2B2B2B] font-mono">Loading library...</p>
+      </div>
+    );
+  }
+
+  if (isError || !books) {
+    return (
+      <div className="min-h-screen bg-[#F8F4EE] flex items-center justify-center flex-col gap-4">
+        <p className="text-red-600 font-mono">Error loading books.</p>
+        {/* Opción para recargar o ir al login si el token expiró */}
+        <Link href="/login" className="text-blue-500 underline">
+          Check authentication
+        </Link>
+      </div>
+    );
+  }
+
   const recommendedBooks = books.slice(0, 3);
   
-  // Most popular books data
   const popularBooks = books.slice(3, 6);
 
   return (
