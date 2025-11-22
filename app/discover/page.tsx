@@ -1,4 +1,5 @@
 "use client"
+import React, { useState } from "react";
 import Header from "../components/Header";
 import SearchBar from "../components/SearchBar";
 import BookCard from "../components/BookCard";
@@ -8,7 +9,7 @@ import Link from "next/link";
 export default function DiscoverPage() {
   // Recommended books data
   const { data: books, isLoading, isError } = useBooks();
-
+  const [searchTerm, setSearchTerm] = useState("");
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#F8F4EE] flex items-center justify-center">
@@ -29,8 +30,17 @@ export default function DiscoverPage() {
     );
   }
 
+  const filteredBooks = books.filter((book) => {
+    const term = searchTerm.toLowerCase();
+    return (
+      book.title.toLowerCase().includes(term) || 
+      book.author.toLowerCase().includes(term) || 
+      book.genres.some(g => g.genre.toLowerCase().includes(term))
+    );
+  });
+
+  const isSearching = searchTerm.length > 0;
   const recommendedBooks = books.slice(0, 3);
-  
   const popularBooks = books.slice(3, 6);
 
   return (
@@ -41,46 +51,76 @@ export default function DiscoverPage() {
         
         {/* Search Bar */}
         <div className="mb-8">
-          <SearchBar />
+          <SearchBar
+            value={searchTerm}
+            onChange={setSearchTerm}
+          />
         </div>
 
-        {/* Recommended for You Section */}
-        <section className="mb-10">
-          <h2 className="text-xl font-bold text-[#2B2B2B] mb-4">Recommended for You</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {recommendedBooks.map((book) => (
-              <BookCard
-                key={book.id}
-                id={book.id}
-                title={book.title}
-                author={book.author}
-                rating={book.rating}
-                coverImage={book.coverImage}
-                coverAlt={book.coverAlt}
-              />
-            ))}
-          </div>
-        </section>
+        {/*Vista de busqueda*/}
+        {isSearching ? (
+          <section>
+            <h2 className="text-xl font-bold text-[#2B2B2B] mb-4">
+              Search Results ({filteredBooks.length})
+            </h2>
+            {filteredBooks.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {filteredBooks.map((book) => (
+                  <BookCard
+                    key={book.id}
+                    id={book.id}
+                    title={book.title}
+                    author={book.author}
+                    rating={book.rating}
+                    coverImage={book.coverImage}
+                    coverAlt={book.coverAlt}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-10 text-gray-500">
+                No books found matching "{searchTerm}"
+              </div>
+            )}
+          </section>
+        ) : (
+          <>
+            <section className="mb-10">
+              <h2 className="text-xl font-bold text-[#2B2B2B] mb-4">Recommended for You</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {recommendedBooks.map((book) => (
+                  <BookCard
+                    key={book.id}
+                    id={book.id}
+                    title={book.title}
+                    author={book.author}
+                    rating={book.rating}
+                    coverImage={book.coverImage}
+                    coverAlt={book.coverAlt}
+                  />
+                ))}
+              </div>
+            </section>
 
-        {/* Most Popular Section */}
-        <section>
-          <h2 className="text-xl font-bold text-[#2B2B2B] mb-4">Most Popular</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {popularBooks.map((book) => (
-              <BookCard
-                key={book.id}
-                id={book.id}
-                title={book.title}
-                author={book.author}
-                rating={book.rating}
-                coverImage={book.coverImage}
-                coverAlt={book.coverAlt}
-              />
-            ))}
-          </div>
-        </section>
+            <section>
+              <h2 className="text-xl font-bold text-[#2B2B2B] mb-4">Most Popular</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {popularBooks.map((book) => (
+                  <BookCard
+                    key={book.id}
+                    id={book.id}
+                    title={book.title}
+                    author={book.author}
+                    rating={book.rating}
+                    coverImage={book.coverImage}
+                    coverAlt={book.coverAlt}
+                  />
+                ))}
+              </div>
+            </section>
+          </>
+        )}
       </div>
     </div>
   );
 }
-

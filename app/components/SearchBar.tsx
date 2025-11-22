@@ -1,4 +1,9 @@
-export default function SearchBar() {
+interface SearchBarProps {
+  value: string;
+  onChange: (value: string) => void;
+}
+
+export default function SearchBar({ value, onChange }: SearchBarProps) {
   return (
     <div className="relative w-full">
       <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
@@ -18,10 +23,11 @@ export default function SearchBar() {
       </div>
       <input
         type="text"
+        value={value} 
+        onChange={(e) => onChange(e.target.value)}
         placeholder="Search books, authors..."
         className="w-full pl-10 pr-4 py-3 rounded-lg border border-[#B8B1A6] bg-[#FCFBF9] text-[#2B2B2B] placeholder:text-[#6F6F6F] focus:outline-none focus:ring-2 focus:ring-[#D6A55F] focus:border-transparent"
       />
     </div>
   );
 }
-

@@ -14,4 +14,6 @@ export interface Book {
         reviewText: string;
         avatar?: string;
     }[];
+    genres: {genre: string}[]
+    
 }
