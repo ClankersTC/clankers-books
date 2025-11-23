@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { setAuthCookie } from "../../lib/auth";
 
+
 const API_URL = process.env.NEXT_PUBLIC_API_ROUTE_CLANKERS_AUTH
 
 export default function LoginPage() {
@@ -43,9 +44,15 @@ export default function LoginPage() {
       if (!res.ok) {
         throw new Error(data.detail || "Invalid email or password");
       }
-
+      const expiresInSeconds = parseInt(data.expiresIn, 10);
+      const expirationDate = new Date(new Date().getTime() + expiresInSeconds * 1000);
       
-      setAuthCookie(data.idToken, data.userData);
+      setAuthCookie(
+        data.idToken, 
+        data.userData,
+        expirationDate,
+        data.refreshToken
+      );
 
       
       router.push("/discover");
