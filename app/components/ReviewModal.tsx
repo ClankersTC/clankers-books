@@ -1,23 +1,37 @@
 "use client";
 
 import { useState } from "react";
-import StarRating from "./StarRating";
+import { useCreateReview } from "@/hooks/useCreateReview";
 
 interface ReviewModalProps {
   isOpen: boolean;
   onClose: () => void;
   bookTitle: string;
+  bookId: string;
+  onSuccess?: () => void;
 }
 
-export default function ReviewModal({ isOpen, onClose, bookTitle }: ReviewModalProps) {
+export default function ReviewModal({ 
+  isOpen, 
+  onClose,
+  bookTitle, 
+  bookId,
+  onSuccess
+}: ReviewModalProps) {
+  const createReviewMutation = useCreateReview();
   const [rating, setRating] = useState(4);
-  const [startedDate, setStartedDate] = useState("2023-11-21");
-  const [finishedDate, setFinishedDate] = useState("2024-07-31");
+  const [startedDate, setStartedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [finishedDate, setFinishedDate] = useState(new Date().toISOString().split('T')[0]);
   const [reviewText, setReviewText] = useState("");
   const [hasSpoilers, setHasSpoilers] = useState(false);
 
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
   if (!isOpen) return null;
 
+  
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-GB", {
@@ -27,14 +41,50 @@ export default function ReviewModal({ isOpen, onClose, bookTitle }: ReviewModalP
     });
   };
 
+  const handleCleanForm = () => {
+    setRating(4);
+    setStartedDate(new Date().toISOString().split('T')[0]);
+    setFinishedDate(new Date().toISOString().split('T')[0]);
+    setReviewText("");
+    setHasSpoilers(false);
+  }
+
   const handleStarClick = (index: number) => {
     setRating(index + 1);
   };
 
-  const handleSubmit = () => {
-    // Handle review submission here
-    console.log({ rating, startedDate, finishedDate, reviewText, hasSpoilers });
-    onClose();
+  const handleSubmit = async () => {
+    setError("");
+    setIsSubmitting(true);
+
+    try {
+      const payload = {
+        rating: rating,
+        reviewText: reviewText, 
+        hasSpoilers: hasSpoilers,
+        startedDate: startedDate, 
+        finishedDate: finishedDate 
+      };
+
+        createReviewMutation.mutate(
+        { bookId, payload },
+        {
+          onSuccess: () => {
+            onClose();
+            handleCleanForm(); 
+          },
+          onError: (error: any) => {
+            
+          }
+        }
+      );
+      
+    } catch (err: any) {
+      console.error("Error submit review:");
+      setError(err.message || "Ocurrió un error inesperado.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

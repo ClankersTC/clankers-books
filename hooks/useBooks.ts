@@ -27,7 +27,7 @@ export const useBooks = () => {
     return useQuery({
         queryKey: ["books"], 
         queryFn: fetchBooks,
-        staleTime: 1000 * 60 * 10, 
+        staleTime: 1000 * 60 * 5, 
         retry: 1, 
     });
 };

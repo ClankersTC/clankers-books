@@ -3,20 +3,59 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Book } from "../../data/books";
 import StarRating from "../../components/StarRating";
 import ReviewCard from "../../components/ReviewCard";
 import ReviewModal from "../../components/ReviewModal";
 import { useBook } from "@/hooks/useBook";
+import { useBookReviews } from "@/hooks/useBookReviews";
 
 interface BookDetailClientProps {
   bookId: string; 
 }
 
+function getTimeAgo(dateInput: string | Date): string {
+  const date = new Date(dateInput);
+  const now = new Date();
+  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  const intervals = {
+    año: 31536000,
+    mes: 2592000,
+    semana: 604800,
+    día: 86400,
+    hora: 3600,
+    minuto: 60,
+  };
+
+  for (const [unit, secondsInUnit] of Object.entries(intervals)) {
+    const interval = Math.floor(seconds / secondsInUnit);
+    if (interval >= 1) {
+      return `hace ${interval} ${unit}${interval > 1 ? 's' : ''}`; 
+    }
+  }
+
+  return "hace un momento";
+}
+
 export default function BookDetailClient({ bookId }: BookDetailClientProps) {
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-  const { data: book, isLoading, isError, error } = useBook(bookId);
+  
+  const { 
+    data: book, 
+    isLoading:isLoadingBooks, 
+    isError: isErrorBooks, 
+    error: error_books 
+  } = useBook(bookId);
+  const {
+    data: reviews, 
+    isLoading:isLoadingBookReviews, 
+    isError: isErrorBookReviews, 
+    error: error_book_reviews
+  } = useBookReviews(bookId); 
 
+ 
+  const isLoading = isLoadingBooks || isLoadingBookReviews
+  const error = error_books || error_book_reviews
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#F8F4EE] flex items-center justify-center">
@@ -24,7 +63,7 @@ export default function BookDetailClient({ bookId }: BookDetailClientProps) {
       </div>
     );
   }
-  if (isError || !book) {
+  if (error || !book || !reviews) {
     return (
       <div className="min-h-screen bg-[#F8F4EE] flex flex-col items-center justify-center gap-4">
         <p className="text-red-600 font-mono text-lg">
@@ -36,6 +75,11 @@ export default function BookDetailClient({ bookId }: BookDetailClientProps) {
       </div>
     );
   }
+
+  const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0);
+  const averageRating = reviews.length > 0 
+  ? (totalRating / reviews.length).toFixed(1) 
+  : 0
 
   return (
     <>
@@ -122,9 +166,9 @@ export default function BookDetailClient({ bookId }: BookDetailClientProps) {
 
               {/* Rating */}
               <div className="flex items-center gap-3">
-                <StarRating rating={book.rating} size="lg" />
-                <span className="text-[#2B2B2B] font-bold">{book.rating}</span>
-                <span className="text-[#6F6F6F]">({book.reviewCount?.toLocaleString() || 0} reviews)</span>
+                <StarRating rating={averageRating} size="lg" />
+                <span className="text-[#2B2B2B] font-bold">{averageRating}</span>
+                <span className="text-[#6F6F6F]">({reviews.length || 0} reviews)</span>
               </div>
 
               {/* Action Buttons */}
@@ -183,11 +227,11 @@ export default function BookDetailClient({ bookId }: BookDetailClientProps) {
             </div>
 
             <div className="space-y-4">
-              {book.reviews.map((review, index) => (
+              {reviews.map((review, index) => (
                 <ReviewCard
                   key={index}
                   reviewerName={review.reviewerName}
-                  timeAgo={review.timeAgo}
+                  timeAgo={getTimeAgo(review.createdAt)}
                   rating={review.rating}
                   reviewText={review.reviewText}
                   avatar={review.avatar}
@@ -202,6 +246,7 @@ export default function BookDetailClient({ bookId }: BookDetailClientProps) {
         isOpen={isReviewModalOpen}
         onClose={() => setIsReviewModalOpen(false)}
         bookTitle={book.title}
+        bookId={bookId}
       />
     </>
   );
